@@ -46,9 +46,18 @@ export function addKeyValue(object, key, target, value, addArray = false) {
   return false;
 }
 
+/**
+ * Receives a string and returns a boolean, number, or string depending on the input
+ * @param {string} value - The string to parse
+ * @return {boolean || number || string} - The parsed value
+ */
 export function parseValue(value) {
   if (value === "true") return true;
   if (value === "false") return false;
   if (isNumeric(value)) return Number(value);
   return value;
+}
+
+export function splitByFirstColon(line) {
+  return line.split(/:(.*)/s);
 }

@@ -1,10 +1,15 @@
-import { parseValue, getBeginningSpaces, addKeyValue } from "./utils.js";
 import { readFileSync } from "fs";
+import {
+  addKeyValue,
+  getBeginningSpaces,
+  parseValue,
+  splitByFirstColon,
+} from "./utils.js";
 
 /**
  * Preprocess the yaml string to remove any comments and whitelines
  * @param {string} yaml_string - The yaml string to preprocess
- * @return {String[]} - The preprocessed yaml string
+ * @return {string[]} - The preprocessed yaml string
  */
 function preprocess_yaml(yaml_string) {
   if (!yaml_string || typeof yaml_string !== "string") {
@@ -12,17 +17,17 @@ function preprocess_yaml(yaml_string) {
   }
   return yaml_string
     .split("---")
-    .map((doc) => {
-      return doc
+    .map((yamlDocument) =>
+      yamlDocument
         .split("\n")
-        .filter((line) => !line.startsWith("#") && line.trim() !== "");
-    })
+        .filter((line) => !line.startsWith("#") && line.trim() !== ""),
+    )
     .filter((x) => x.length > 0);
 }
 
 /**
  * Parse the yaml string to get the index of the lines with the same indentation and the position of the parent of each line
- * @param {String[]} yamlArray - The preprocessed yaml string
+ * @param {string[]} yamlArray - The preprocessed yaml string
  * @return {Array[]} - An array containing the index of the lines with the same indentation and the position of the parent of each line
  */
 function parseYaml(yamlArray) {
@@ -61,24 +66,26 @@ function getParent(i, positionToParent, allWhitespaces) {
 
 /**
  * Construct the object from the yaml string array using the index of the lines with the same indentation and the position of the parent of each line
- * @param {String[]} lines - The preprocessed yaml string
+ * @param {string[]} lines - The preprocessed yaml string
  * @param {number[]} parents - The position of the parent of each line
  * @param {number[]} indexToIndent - The index of the lines with the same indentation *still not used*
  * @return {Object} - The object constructed from the yaml string
  */
 function constructObject(lines, parents) {
   const result = {};
+
   lines.forEach((line, i) => {
     const parentIndex = parents[i];
     let addArray = false;
     if (lines[i + 1] && lines[i + 1].includes("-")) addArray = true;
-    let [key, value] = line.split(/:(.*)/s); // split by the first colon
+    let [key, value] = splitByFirstColon(line);
 
     if (parentIndex === -1) {
       value = parseValue(value);
       result[key] = !value ? (addArray ? [] : {}) : value;
     } else {
-      const parent = lines[parentIndex].split(/:(.*)/s)[0].trim();
+      const parent = splitByFirstColon(lines[parentIndex])[0].trim();
+
       if (line.includes("-")) {
         if (!line.includes(":")) {
           value = parseValue(line.replace("-", "").trim());
@@ -89,7 +96,6 @@ function constructObject(lines, parents) {
           value = tmpObj;
         }
       }
-
       addKeyValue(result, key.trim(), parent, value, addArray);
     }
   });
