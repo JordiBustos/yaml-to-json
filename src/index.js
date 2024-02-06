@@ -105,7 +105,7 @@ function main() {
       positionToParent,
       indexToIndent
     );
-    console.log(json);
+    console.log(JSON.stringify(json, null, 2));
   } catch (error) {
     console.error("Something went wrong while reading the file", error);
   }
