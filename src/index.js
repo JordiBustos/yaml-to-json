@@ -1,9 +1,4 @@
-import {
-  isNumeric,
-  parseValue,
-  getBeginningSpaces,
-  addKeyValue,
-} from "./utils.js";
+import { parseValue, getBeginningSpaces, addKeyValue } from "./utils.js";
 import { readFileSync } from "fs";
 
 /**
@@ -26,6 +21,10 @@ function preprocess_yaml(yaml_string) {
  * @return {Array[]} - An array containing the index of the lines with the same indentation and the position of the parent of each line
  */
 function parseYaml(yamlArray) {
+  if (!Array.isArray(yamlArray) || yamlArray.length === 0) {
+    return [];
+  }
+
   const allWhitespaces = yamlArray.map((x) => getBeginningSpaces(x));
   const ammountOfIndentationLevels = new Set([...allWhitespaces]).size;
   const indexToIndent = new Array(ammountOfIndentationLevels)
@@ -111,7 +110,7 @@ function main() {
     const json = constructObject(
       yaml_preprocessed,
       positionToParent,
-      indexToIndent
+      indexToIndent,
     );
     console.log(JSON.stringify(json, null, 2));
   } catch (error) {
