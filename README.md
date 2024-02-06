@@ -31,3 +31,4 @@ workflows:
 ## TODO
 
 - Support to repeated keys based on indentation.
+- Parse lines that start with - into String[] instead of key values of object
