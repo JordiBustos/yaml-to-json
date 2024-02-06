@@ -73,17 +73,20 @@ function constructObject(lines, parents, indexToIndent) {
     const line = lines[i];
     const parentIndex = parents[i];
     const currentObject = {};
+    let addArray = false;
+    if (lines[i + 1] && lines[i + 1].includes("-")) {
+      addArray = true;
+    }
 
     if (parentIndex === 0) {
       const keyValue = line.split(":");
       result[keyValue[0]] =
-        keyValue[1] === "" ? currentObject : keyValue[1].trim();
+        keyValue[1] === ""
+          ? addArray
+            ? []
+            : currentObject
+          : keyValue[1].trim();
     } else {
-      let addArray = false;
-      if (lines[i + 1] && lines[i + 1].includes("-")) {
-        addArray = true;
-      }
-
       const parent = lines[parentIndex].split(":")[0].trim();
       const keyValue = line.split(":");
       let value = keyValue === "" ? "" : keyValue[1];

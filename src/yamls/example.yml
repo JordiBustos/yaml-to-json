@@ -21,3 +21,7 @@ workflows:
     jobs2:
       - build
       - test
+
+pepito:
+  - a
+  - b
