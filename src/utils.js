@@ -49,5 +49,5 @@ export function parseValue(value) {
   if (value === "true") return true;
   if (value === "false") return false;
   if (isNumeric(value)) return Number(value);
-  return value.trim();
+  return value;
 }
