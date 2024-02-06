@@ -81,4 +81,3 @@ numbers_and_letters:
 ## TODO
 
 - Support for repeated keys based on indentation.
-- Add support to document separation with ---

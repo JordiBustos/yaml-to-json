@@ -10,9 +10,15 @@ function preprocess_yaml(yaml_string) {
   if (!yaml_string || typeof yaml_string !== "string") {
     return "";
   }
-  return yaml_string
-    .split("\n")
-    .filter((line) => !line.startsWith("#") && line.trim() !== "");
+  const documents = yaml_string.split("---");
+
+  return documents
+    .map((doc) => {
+      return doc
+        .split("\n")
+        .filter((line) => !line.startsWith("#") && line.trim() !== "");
+    })
+    .filter((x) => x.length > 0);
 }
 
 /**
@@ -37,7 +43,7 @@ function parseYaml(yamlArray) {
     indexToIndent[indent / 2].push(index);
 
     indent === 0
-      ? (positionToParent[index] = 0)
+      ? (positionToParent[index] = -1)
       : getParent(index, positionToParent, allWhitespaces);
   });
 
@@ -77,7 +83,7 @@ function constructObject(lines, parents, indexToIndent) {
     if (lines[i + 1] && lines[i + 1].includes("-")) addArray = true;
     let [key, value] = line.split(/:(.*)/s); // split by the first colon
 
-    if (parentIndex === 0) {
+    if (parentIndex === -1) {
       value = parseValue(value);
       result[key] = !value ? (addArray ? [] : {}) : value;
     } else {
@@ -106,13 +112,15 @@ function main() {
     const content = readFileSync(filepath, "utf8");
     const yaml_string = content.toString();
     const yaml_preprocessed = preprocess_yaml(yaml_string);
-    const [indexToIndent, positionToParent] = parseYaml(yaml_preprocessed);
-    const json = constructObject(
-      yaml_preprocessed,
-      positionToParent,
-      indexToIndent,
+    const arrayOfJsons = new Array(yaml_preprocessed.length);
+    yaml_preprocessed.forEach((yaml, i) => {
+      const [indexToIndent, positionToParent] = parseYaml(yaml);
+      arrayOfJsons[i] = constructObject(yaml, positionToParent, indexToIndent);
+    });
+
+    arrayOfJsons.forEach((json) =>
+      console.log(JSON.stringify(json, null, 2), "\n"),
     );
-    console.log(JSON.stringify(json, null, 2));
   } catch (error) {
     console.error("Something went wrong while reading the file", error);
   }

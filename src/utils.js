@@ -29,8 +29,9 @@ export function addKeyValue(object, key, target, value, addArray = false) {
   if (object.hasOwnProperty(target)) {
     if (Array.isArray(object[target])) {
       object[target].push(value);
+    } else {
+      object[target][key] = value || (addArray ? [] : {});
     }
-    object[target][key] = value || (addArray ? [] : {});
     return true;
   }
 
