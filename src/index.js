@@ -23,20 +23,20 @@ function preprocess_yaml(yaml_string) {
 function parseYaml(yamlArray) {
   const allWhitespaces = yamlArray.map((x) => getBeginningSpaces(x));
 
-  const maxIndent = new Set([...allWhitespaces]).size - 1;
-  const indexToIndent = new Array(maxIndent + 1).fill().map(() => []);
+  const ammountOfIndentationLevels = new Set([...allWhitespaces]).size;
+  const indexToIndent = new Array(ammountOfIndentationLevels)
+    .fill()
+    .map(() => []);
   const positionToParent = new Array(yamlArray.length).fill(0);
 
-  for (let i = 0; i < yamlArray.length; i++) {
-    const indent = allWhitespaces[i];
-    indexToIndent[indent / 2].push(i);
+  yamlArray.forEach((_, index) => {
+    const indent = allWhitespaces[index];
+    indexToIndent[indent / 2].push(index);
 
-    if (indent === 0) {
-      positionToParent[i] = 0;
-    } else {
-      getParent(i, positionToParent, allWhitespaces);
-    }
-  }
+    indent === 0
+      ? (positionToParent[index] = 0)
+      : getParent(index, positionToParent, allWhitespaces);
+  });
 
   return [indexToIndent, positionToParent];
 }
@@ -71,27 +71,26 @@ function constructObject(lines, parents, indexToIndent) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const parentIndex = parents[i];
-    const currentObject = {};
     let addArray = false;
-    if (lines[i + 1] && lines[i + 1].includes("-")) {
-      addArray = true;
-    }
-    let [key, value] = line.split(/:(.*)/s);
+    if (lines[i + 1] && lines[i + 1].includes("-")) addArray = true;
+    let [key, value] = line.split(/:(.*)/s); // split by the first colon
 
     if (parentIndex === 0) {
       value = isNumeric(value) ? Number(value) : value;
-      result[key] = value === "" ? (addArray ? [] : currentObject) : value;
+      result[key] = !value ? (addArray ? [] : {}) : value;
     } else {
       const parent = lines[parentIndex].split(/:(.*)/s)[0].trim();
-      if (line.includes("-") && !line.includes(":")) {
-        value = line.replace("-", "").trim();
-        value = isNumeric(value) ? Number(value) : value;
-      } else if (line.includes("-")) {
-        const tmpObj = {};
-        tmpObj[key.replace("-", "").trim()] = isNumeric(value)
-          ? Number(value)
-          : value.trim();
-        value = tmpObj;
+      if (line.includes("-")) {
+        if (!line.includes(":")) {
+          value = line.replace("-", "").trim();
+          value = isNumeric(value) ? Number(value) : value;
+        } else {
+          const tmpObj = {};
+          tmpObj[key.replace("-", "").trim()] = isNumeric(value)
+            ? Number(value)
+            : value.trim();
+          value = tmpObj;
+        }
       }
 
       addKeyValue(result, key.trim(), parent, value, addArray);
