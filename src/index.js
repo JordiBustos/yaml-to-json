@@ -1,12 +1,12 @@
 import { readFileSync } from "fs";
+import { stdin as input, stdout as output } from "node:process";
+import * as readline from "node:readline/promises";
 import {
   addKeyValue,
   getBeginningSpaces,
   parseValue,
   splitByFirstColon,
 } from "./utils.js";
-import * as readline from "node:readline/promises";
-import { stdin as input, stdout as output } from "node:process";
 
 // IIFE to read the yaml path from the user and call the main function
 (async () => {
