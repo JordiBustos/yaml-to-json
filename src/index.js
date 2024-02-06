@@ -60,6 +60,11 @@ function constructObject(lines, parents, indexToIndent) {
 
     const currentObject = {};
 
+    if (lines[i + 1] && lines[i + 1].includes("-")) {
+      // TODO
+      // make that all the lines with - are added into a list instead of a new object
+    }
+
     if (parentIndex === 0) {
       const keyValue = line.split(":");
       result[keyValue[0]] =
@@ -69,14 +74,14 @@ function constructObject(lines, parents, indexToIndent) {
       const keyValue = line.split(":");
       let value = keyValue === "" ? "" : keyValue[1];
 
-      agregarKeyValue(result, keyValue[0].trim(), parent, value);
+      addKeyValue(result, keyValue[0].trim(), parent, value);
     }
   }
 
   return result;
 }
 
-function agregarKeyValue(object, key, target, value) {
+function addKeyValue(object, key, target, value) {
   if (object.hasOwnProperty(target)) {
     object[target][key] = value || {};
     return true;
@@ -84,7 +89,7 @@ function agregarKeyValue(object, key, target, value) {
 
   for (const prop in object) {
     if (typeof object[prop] === "object") {
-      if (agregarKeyValue(object[prop], key, target, value)) {
+      if (addKeyValue(object[prop], key, target, value)) {
         return true;
       }
     }
