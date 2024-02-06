@@ -70,15 +70,15 @@ function constructObject(lines, parents) {
   return result;
 }
 
-function agregarKeyValue(objeto, key, target, value) {
-  if (objeto.hasOwnProperty(target)) {
-    objeto[target][key] = value || {};
+function agregarKeyValue(object, key, target, value) {
+  if (object.hasOwnProperty(target)) {
+    object[target][key] = value || {};
     return true;
   }
 
-  for (const prop in objeto) {
-    if (typeof objeto[prop] === "object") {
-      if (agregarKeyValue(objeto[prop], key, target, value)) {
+  for (const prop in object) {
+    if (typeof object[prop] === "object") {
+      if (agregarKeyValue(object[prop], key, target, value)) {
         return true;
       }
     }
