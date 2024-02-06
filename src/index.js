@@ -1,3 +1,4 @@
+import { isNumeric, getBeginningSpaces, addKeyValue } from "./utils.js";
 import { readFileSync } from "fs";
 
 /**
@@ -59,14 +60,12 @@ function getParent(i, positionToParent, allWhitespaces) {
 }
 
 /**
- * Get the number of spaces at the beginning of a string
- * @param {string} line - The string to get the number of spaces from
- * @return {number} - The number of spaces at the beginning of the string
+ * Construct the object from the yaml string array using the index of the lines with the same indentation and the position of the parent of each line
+ * @param {String[]} lines - The preprocessed yaml string
+ * @param {number[]} parents - The position of the parent of each line
+ * @param {number[]} indexToIndent - The index of the lines with the same indentation *still not used*
+ * @return {Object} - The object constructed from the yaml string
  */
-function getBeginningSpaces(line) {
-  return line.search(/\S|$/);
-}
-
 function constructObject(lines, parents, indexToIndent) {
   const result = {};
   for (let i = 0; i < lines.length; i++) {
@@ -77,52 +76,29 @@ function constructObject(lines, parents, indexToIndent) {
     if (lines[i + 1] && lines[i + 1].includes("-")) {
       addArray = true;
     }
+    let [key, value] = line.split(/:(.*)/s);
 
     if (parentIndex === 0) {
-      const keyValue = line.split(/:(.*)/s);
-      result[keyValue[0]] =
-        keyValue[1] === ""
-          ? addArray
-            ? []
-            : currentObject
-          : keyValue[1].trim();
+      value = isNumeric(value) ? Number(value) : value;
+      result[key] = value === "" ? (addArray ? [] : currentObject) : value;
     } else {
       const parent = lines[parentIndex].split(/:(.*)/s)[0].trim();
-      const keyValue = line.split(/:(.*)/s);
-      let value = keyValue === "" ? "" : keyValue[1];
-
       if (line.includes("-") && !line.includes(":")) {
         value = line.replace("-", "").trim();
+        value = isNumeric(value) ? Number(value) : value;
       } else if (line.includes("-")) {
-        value = {};
-        value[keyValue[0].replace("-", "").trim()] = keyValue[1].trim();
+        const tmpObj = {};
+        tmpObj[key.replace("-", "").trim()] = isNumeric(value)
+          ? Number(value)
+          : value.trim();
+        value = tmpObj;
       }
 
-      addKeyValue(result, keyValue[0].trim(), parent, value, addArray);
+      addKeyValue(result, key.trim(), parent, value, addArray);
     }
   }
 
   return result;
-}
-
-function addKeyValue(object, key, target, value, addArray = false) {
-  if (object.hasOwnProperty(target)) {
-    if (Array.isArray(object[target])) {
-      object[target].push(value);
-    }
-    object[target][key] = value || (addArray ? [] : {});
-    return true;
-  }
-
-  for (const prop in object) {
-    if (typeof object[prop] === "object") {
-      if (addKeyValue(object[prop], key, target, value, addArray)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 }
 
 function main() {

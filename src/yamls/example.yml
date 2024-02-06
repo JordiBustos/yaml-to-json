@@ -23,5 +23,5 @@ workflows:
       - test
 
 pepito:
-  - a
   - b
+  - 55
