@@ -5,6 +5,45 @@ import {
   parseValue,
   splitByFirstColon,
 } from "./utils.js";
+import * as readline from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
+
+// IIFE to read the yaml path from the user and call the main function
+(async () => {
+  const rl = readline.createInterface({ input, output });
+  while (true) {
+    const answer = await rl.question("Insert the yaml path to parse to JSON: ");
+    main(answer);
+    const repeat = await rl.question(
+      "Do you want to parse another yaml file? (y/n): ",
+    );
+    if (repeat.toLowerCase() === "n") break;
+  }
+  rl.close();
+})();
+
+/**
+ * Main function to read the yaml file and parse it to JSON
+ * @param {string} filepath
+ */
+function main(filepath) {
+  try {
+    const content = readFileSync(filepath, "utf8");
+    const yaml_string = content.toString();
+    const yaml_preprocessed = preprocess_yaml(yaml_string);
+    const arrayOfJsons = new Array(yaml_preprocessed.length);
+    yaml_preprocessed.forEach((yaml, i) => {
+      const positionToParent = parseYaml(yaml);
+      arrayOfJsons[i] = constructObject(yaml, positionToParent);
+    });
+
+    arrayOfJsons.forEach((json) =>
+      console.log(JSON.stringify(json, null, 2), "\n"),
+    );
+  } catch (error) {
+    console.error("Something went wrong while reading the file", error);
+  }
+}
 
 /**
  * Preprocess the yaml string to remove any comments and whitelines
@@ -105,25 +144,3 @@ function constructObject(lines, parents) {
 
   return result;
 }
-
-function main() {
-  try {
-    const filepath = "src/yamls/example.yml";
-    const content = readFileSync(filepath, "utf8");
-    const yaml_string = content.toString();
-    const yaml_preprocessed = preprocess_yaml(yaml_string);
-    const arrayOfJsons = new Array(yaml_preprocessed.length);
-    yaml_preprocessed.forEach((yaml, i) => {
-      const positionToParent = parseYaml(yaml);
-      arrayOfJsons[i] = constructObject(yaml, positionToParent);
-    });
-
-    arrayOfJsons.forEach((json) =>
-      console.log(JSON.stringify(json, null, 2), "\n"),
-    );
-  } catch (error) {
-    console.error("Something went wrong while reading the file", error);
-  }
-}
-
-main();
