@@ -72,6 +72,9 @@ function getParent(i, positionToParent, allWhitespaces) {
  * @return {Object} - The object constructed from the yaml string
  */
 function constructObject(lines, parents) {
+  if (lines.length === 0) return {};
+  if (lines.length !== parents.length) return {};
+
   const result = {};
 
   lines.forEach((line, i) => {
