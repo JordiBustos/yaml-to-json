@@ -10,9 +10,8 @@ function preprocess_yaml(yaml_string) {
   if (!yaml_string || typeof yaml_string !== "string") {
     return "";
   }
-  const documents = yaml_string.split("---");
-
-  return documents
+  return yaml_string
+    .split("---")
     .map((doc) => {
       return doc
         .split("\n")
@@ -30,24 +29,16 @@ function parseYaml(yamlArray) {
   if (!Array.isArray(yamlArray) || yamlArray.length === 0) {
     return [];
   }
-
-  const allWhitespaces = yamlArray.map((x) => getBeginningSpaces(x));
-  const ammountOfIndentationLevels = new Set([...allWhitespaces]).size;
-  const indexToIndent = new Array(ammountOfIndentationLevels)
-    .fill()
-    .map(() => []);
+  const allWhitespaces = yamlArray.map(getBeginningSpaces);
   const positionToParent = new Array(yamlArray.length).fill(0);
 
   yamlArray.forEach((_, index) => {
-    const indent = allWhitespaces[index];
-    indexToIndent[indent / 2].push(index);
-
-    indent === 0
+    allWhitespaces[index] === 0
       ? (positionToParent[index] = -1)
       : getParent(index, positionToParent, allWhitespaces);
   });
 
-  return [indexToIndent, positionToParent];
+  return positionToParent;
 }
 
 /**
@@ -75,7 +66,7 @@ function getParent(i, positionToParent, allWhitespaces) {
  * @param {number[]} indexToIndent - The index of the lines with the same indentation *still not used*
  * @return {Object} - The object constructed from the yaml string
  */
-function constructObject(lines, parents, indexToIndent) {
+function constructObject(lines, parents) {
   const result = {};
   lines.forEach((line, i) => {
     const parentIndex = parents[i];
@@ -114,8 +105,8 @@ function main() {
     const yaml_preprocessed = preprocess_yaml(yaml_string);
     const arrayOfJsons = new Array(yaml_preprocessed.length);
     yaml_preprocessed.forEach((yaml, i) => {
-      const [indexToIndent, positionToParent] = parseYaml(yaml);
-      arrayOfJsons[i] = constructObject(yaml, positionToParent, indexToIndent);
+      const positionToParent = parseYaml(yaml);
+      arrayOfJsons[i] = constructObject(yaml, positionToParent);
     });
 
     arrayOfJsons.forEach((json) =>
