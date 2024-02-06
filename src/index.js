@@ -1,4 +1,9 @@
-import { isNumeric, getBeginningSpaces, addKeyValue } from "./utils.js";
+import {
+  isNumeric,
+  parseValue,
+  getBeginningSpaces,
+  addKeyValue,
+} from "./utils.js";
 import { readFileSync } from "fs";
 
 /**
@@ -22,7 +27,6 @@ function preprocess_yaml(yaml_string) {
  */
 function parseYaml(yamlArray) {
   const allWhitespaces = yamlArray.map((x) => getBeginningSpaces(x));
-
   const ammountOfIndentationLevels = new Set([...allWhitespaces]).size;
   const indexToIndent = new Array(ammountOfIndentationLevels)
     .fill()
@@ -68,34 +72,31 @@ function getParent(i, positionToParent, allWhitespaces) {
  */
 function constructObject(lines, parents, indexToIndent) {
   const result = {};
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  lines.forEach((line, i) => {
     const parentIndex = parents[i];
     let addArray = false;
     if (lines[i + 1] && lines[i + 1].includes("-")) addArray = true;
     let [key, value] = line.split(/:(.*)/s); // split by the first colon
 
     if (parentIndex === 0) {
-      value = isNumeric(value) ? Number(value) : value;
+      value = parseValue(value);
       result[key] = !value ? (addArray ? [] : {}) : value;
     } else {
       const parent = lines[parentIndex].split(/:(.*)/s)[0].trim();
       if (line.includes("-")) {
         if (!line.includes(":")) {
-          value = line.replace("-", "").trim();
-          value = isNumeric(value) ? Number(value) : value;
+          value = parseValue(line.replace("-", "").trim());
         } else {
           const tmpObj = {};
-          tmpObj[key.replace("-", "").trim()] = isNumeric(value)
-            ? Number(value)
-            : value.trim();
+          value = parseValue(value.trim());
+          tmpObj[key.replace("-", "").trim()] = value;
           value = tmpObj;
         }
       }
 
       addKeyValue(result, key.trim(), parent, value, addArray);
     }
-  }
+  });
 
   return result;
 }
@@ -110,7 +111,7 @@ function main() {
     const json = constructObject(
       yaml_preprocessed,
       positionToParent,
-      indexToIndent,
+      indexToIndent
     );
     console.log(JSON.stringify(json, null, 2));
   } catch (error) {

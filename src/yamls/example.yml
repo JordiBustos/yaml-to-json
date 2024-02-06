@@ -23,5 +23,5 @@ workflows:
       - test
 
 numbers_and_letters:
-  - b
+  - true
   - 55

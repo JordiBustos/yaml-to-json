@@ -44,3 +44,10 @@ export function addKeyValue(object, key, target, value, addArray = false) {
 
   return false;
 }
+
+export function parseValue(value) {
+  if (value.trim() === "true") return true;
+  if (value.trim() === "false") return false;
+  if (isNumeric(value)) return Number(value);
+  return value.trim();
+}
