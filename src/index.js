@@ -79,7 +79,7 @@ function constructObject(lines, parents, indexToIndent) {
     }
 
     if (parentIndex === 0) {
-      const keyValue = line.split(":");
+      const keyValue = line.split(/:(.*)/s);
       result[keyValue[0]] =
         keyValue[1] === ""
           ? addArray
@@ -87,8 +87,8 @@ function constructObject(lines, parents, indexToIndent) {
             : currentObject
           : keyValue[1].trim();
     } else {
-      const parent = lines[parentIndex].split(":")[0].trim();
-      const keyValue = line.split(":");
+      const parent = lines[parentIndex].split(/:(.*)/s)[0].trim();
+      const keyValue = line.split(/:(.*)/s);
       let value = keyValue === "" ? "" : keyValue[1];
 
       if (line.includes("-") && !line.includes(":")) {
