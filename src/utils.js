@@ -58,6 +58,11 @@ export function parseValue(value) {
   return value;
 }
 
+/**
+ * Split a string by the first colon
+ * @param {string} line - The string to split
+ * @return {string[]} - The string split by the first colon
+ */
 export function splitByFirstColon(line) {
   return line.split(/:(.*)/s);
 }
