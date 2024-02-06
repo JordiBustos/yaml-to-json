@@ -46,8 +46,8 @@ export function addKeyValue(object, key, target, value, addArray = false) {
 }
 
 export function parseValue(value) {
-  if (value.trim() === "true") return true;
-  if (value.trim() === "false") return false;
+  if (value === "true") return true;
+  if (value === "false") return false;
   if (isNumeric(value)) return Number(value);
   return value.trim();
 }
