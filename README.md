@@ -1,8 +1,12 @@
-# JavaScript algorithm to convert valid .yml file into json object.
+# YAML to JSON converter
 
-## Example
+## JavaScript algorithm to convert valid .yml file into json object.
 
-```yml
+This JavaScript algorithm converts a valid .yml file into a JSON object. It assumes the input file is valid YAML and can be converted into JSON.
+
+## Example Input
+
+```yaml
 version: 2.1
 
 # Define the jobs we want to run for this project
@@ -26,9 +30,55 @@ workflows:
     jobs2:
       - build: l
       - test: l
+
+numbers_and_letters:
+  - b
+  - 55
+```
+
+## Example output
+
+```json
+{
+  "version": 2.1,
+  "jobs": {
+    "build": {
+      "docker": [
+        {
+          "image": "cimg/base:2023.03"
+        }
+      ],
+      "steps": [
+        "checkout",
+        {
+          "run": "echo \"this is the build job\""
+        }
+      ]
+    },
+    "test": {
+      "docker2": [
+        {
+          "image": "cimg/base:2023.03"
+        }
+      ],
+      "steps2": [
+        "checkout",
+        {
+          "run": "echo \"this is the test job\""
+        }
+      ]
+    }
+  },
+  "workflows": {
+    "build_and_test": {
+      "jobs2": ["build", "test"]
+    }
+  },
+  "numbers_and_letters": ["b", 55]
+}
 ```
 
 ## TODO
 
-- Support to repeated keys based on indentation.
-- Respect datatypes
+- Support for repeated keys based on indentation.
+- Preserve data types during conversion.

@@ -22,6 +22,6 @@ workflows:
       - build
       - test
 
-pepito:
+numbers_and_letters:
   - b
   - 55
