@@ -6,6 +6,7 @@ import {
   getBeginningSpaces,
   parseValue,
   splitByFirstColon,
+  saveJsonToDirectory,
 } from "./utils.js";
 
 // IIFE to read the yaml path from the user and call the main function
@@ -13,11 +14,18 @@ import {
   const rl = readline.createInterface({ input, output });
   while (true) {
     const answer = await rl.question("Insert the yaml path to parse to JSON: ");
-    main(answer);
+    const outputPath = await rl.question(
+      "Insert the path where the JSON will be saved: ",
+    );
+    console.log("Parsing the yaml file...");
+    main(answer, outputPath);
     const repeat = await rl.question(
       "Do you want to parse another yaml file? (y/n): ",
     );
-    if (repeat.toLowerCase() === "n") break;
+    if (repeat.toLowerCase() === "n") {
+      console.log("Goodbye...");
+      break;
+    }
   }
   rl.close();
 })();
@@ -25,8 +33,9 @@ import {
 /**
  * Main function to read the yaml file and parse it to JSON
  * @param {string} filepath
+ * @param {string} outputPath
  */
-function main(filepath) {
+function main(filepath, outputPath) {
   try {
     const content = readFileSync(filepath, "utf8");
     const yaml_string = content.toString();
@@ -37,9 +46,15 @@ function main(filepath) {
       arrayOfJsons[i] = constructObject(yaml, positionToParent);
     });
 
-    arrayOfJsons.forEach((json) =>
-      console.log(JSON.stringify(json, null, 2), "\n"),
-    );
+    const allSuccess = arrayOfJsons
+      .map((json, i) =>
+        saveJsonToDirectory(`${outputPath}${i !== 0 ? i : ""}`, json),
+      )
+      .every((result) => result === true);
+    if (allSuccess)
+      console.log(
+        "The yaml file was parsed successfully and saved to the output directory",
+      );
   } catch (error) {
     console.error("Something went wrong while reading the file", error);
   }

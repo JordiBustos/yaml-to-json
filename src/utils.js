@@ -1,3 +1,5 @@
+import { writeFile } from "fs";
+
 /**
  * Function to check if a string is a valid number
  * @param {string} str - The string to check if it is a number
@@ -65,4 +67,21 @@ export function parseValue(value) {
  */
 export function splitByFirstColon(line) {
   return line.split(/:(.*)/s);
+}
+
+/**
+ * Save the json object to a file
+ * @param {string} outputPath - The path to save the json file to
+ * @param {Object} json - The json object to save
+ * @return {boolean} - True if the json was saved successfully
+ */
+export function saveJsonToDirectory(outputPath, json) {
+  let success = true;
+  writeFile(outputPath, JSON.stringify(json, null, 2), (err) => {
+    if (err) {
+      console.error(err);
+      success = false;
+    }
+  });
+  return success;
 }
