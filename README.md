@@ -28,8 +28,8 @@ jobs:
 workflows:
   build_and_test:
     jobs2:
-      - build: l
-      - test: l
+      - build
+      - test
 
 numbers_and_letters:
   - b
