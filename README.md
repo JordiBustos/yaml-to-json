@@ -1,5 +1,9 @@
 # YAML to JSON converter
 
+# Run
+
+node src/index.js
+
 ## JavaScript algorithm to convert valid .yml file into json object.
 
 This JavaScript algorithm converts a valid .yml file into a JSON object. It assumes the input file is valid YAML and can be converted into JSON.
